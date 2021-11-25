@@ -75,6 +75,7 @@ const resolvers = {
 		// returns User
 		removeBook: async (parent, args, context, info) => {
 			const { bookId } = args;
+            // const userId = "619f163a1d455824cc304ab1";
 			if (context.user) {
 				return await User.findOneAndUpdate(
 					{ _id: context.user.id },

@@ -1,17 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
+
+//* IMPORTS
+// import { useMutation, useQuery } from '@apollo/client';
+// import { useParams } from 'react-router-dom';
+// import { GET_ME } from '../utils/queries';
+// import { REMOVE_BOOK } from '../../utils/mutations';
+
+
 import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
+  //* bring in params, and GET_ME and useQuery
+  // // Use `useParams()` to retrieve value of the route parameter `:profileId`
+  // const { id: id } = useParams();
+
+  // const { loading, data } = useQuery(GET_ME, {
+  //   // pass URL parameter
+  //   variables: { _id: id },
+  // });
+
+  // const me = data?.me || {};
+
   const [userData, setUserData] = useState({});
+
+  //* bring in REMOVE_BOOK and useMutation
+  // const [removeBook, { error }] = useMutation(REMOVE_BOOK, {
+  //   update(cache, { data: { removeBook }
+  //   }) {
+  //     try {
+  //       cache.writeQuery({
+  //         query: GET_ME,
+  //         data: {
+  //           me: removeBook
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+  //   },
+  // });
+
 
   // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
 
   useEffect(() => {
+
     const getUserData = async () => {
       try {
         const token = Auth.loggedIn() ? Auth.getToken() : null;
@@ -64,6 +102,18 @@ const SavedBooks = () => {
   if (!userDataLength) {
     return <h2>LOADING...</h2>;
   }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
+
+  // if (!me?._id) {
+  //   return (
+  //     <h4>
+  //       You need to be logged in to see this. Use the navigation links above to
+  //       sign up or log in!
+  //     </h4>
+  //   );
+  // }
 
   return (
     <>
@@ -96,6 +146,9 @@ const SavedBooks = () => {
           })}
         </CardColumns>
       </Container>
+      {/* {error && (
+        <div className="my-3 p-3 bg-danger text-white">{error.message}</div>
+      )} */}
     </>
   );
 };
