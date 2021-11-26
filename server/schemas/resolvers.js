@@ -4,14 +4,14 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
 	Query: {
-        users: async (parent, args, context, info) => {
+        users: async () => {
             const allUsers = User.find().populate("savedBooks");
             if (!allUsers) {
                 throw new AuthenticationError("No Users!");
             }
             return allUsers;
         },
-		me: async (parent, args, context, info) => {
+		me: async (parent, args, context) => {
 			if (context.user) {
 				return User.findOne({ _id: context.user._id }).populate("savedBooks");
 			}
@@ -20,7 +20,7 @@ const resolvers = {
 	},
 
 	Mutation: {
-		login: async (parent, args, context, info) => {
+		login: async (parent, args) => {
 			const { email, password } = args.login;
 
 			const foundUser = await User.findOne({ email });
@@ -38,7 +38,7 @@ const resolvers = {
 		},
 		// accepts (login AS email, password)
 		// returns Auth
-		addUser: async (parent, args, context, info) => {
+		addUser: async (parent, args) => {
 			const { username, email, password } = args.signup;
 			const newUser = await User.create({ username, email, password });
 

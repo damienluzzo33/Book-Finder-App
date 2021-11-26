@@ -3,78 +3,51 @@ import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap
 
 
 //* IMPORTS
-// import { useMutation, useQuery } from '@apollo/client';
-// import { useParams } from 'react-router-dom';
-// import { GET_ME } from '../utils/queries';
-// import { REMOVE_BOOK } from '../../utils/mutations';
+import { useMutation, useQuery, gql } from '@apollo/client';
+import { useParams } from 'react-router-dom';
+import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK } from '../utils/mutations';
 
 
-import { getMe, deleteBook } from '../utils/API';
+// import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  //* bring in params, and GET_ME and useQuery
-  // // Use `useParams()` to retrieve value of the route parameter `:profileId`
-  // const { id: id } = useParams();
+  //* use useQuery() to execute GET_ME query on load 
+  const { id: id, bookId: bookId } = useParams();
 
-  // const { loading, data } = useQuery(GET_ME, {
-  //   // pass URL parameter
-  //   variables: { _id: id },
-  // });
+  const { loading, data } = useQuery(GET_ME, {
+    // pass URL parameter
+    variables: { _id: id },
+  });
 
-  // const me = data?.me || {};
+  //* while loading, return loading div
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  const [userData, setUserData] = useState({});
+  const thisData = data?.me || {};
 
-  //* bring in REMOVE_BOOK and useMutation
-  // const [removeBook, { error }] = useMutation(REMOVE_BOOK, {
-  //   update(cache, { data: { removeBook }
-  //   }) {
-  //     try {
-  //       cache.writeQuery({
-  //         query: GET_ME,
-  //         data: {
-  //           me: removeBook
-  //         }
-  //       });
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   },
-  // });
+  const [userData, setUserData] = useState(thisData);
 
-
-  // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
 
-  useEffect(() => {
-
-    const getUserData = async () => {
+  //* bring in REMOVE_BOOK and useMutation
+  const [removeBook] = useMutation(REMOVE_BOOK, {
+    update(cache, { data: { removeBook } }) {
       try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-        if (!token) {
-          return false;
-        }
-
-        const response = await getMe(token);
-
-        if (!response.ok) {
-          throw new Error('something went wrong!');
-        }
-
-        const user = await response.json();
-        setUserData(user);
-      } catch (err) {
-        console.error(err);
+        cache.writeQuery({
+          query: GET_ME,
+          data: { me: removeBook },
+        });
+      } catch (e) {
+        console.error(e);
       }
-    };
+    },
+  });
 
-    getUserData();
-  }, [userDataLength]);
-
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
+  //* create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -83,7 +56,9 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await deleteBook(bookId, token);
+      const response = await removeBook({
+        variables: { bookId }
+      });
 
       if (!response.ok) {
         throw new Error('something went wrong!');
