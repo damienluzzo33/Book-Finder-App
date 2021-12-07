@@ -4,13 +4,6 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
 	Query: {
-        users: async () => {
-            const allUsers = User.find().populate("savedBooks");
-            if (!allUsers) {
-                throw new AuthenticationError("No Users!");
-            }
-            return allUsers;
-        },
 		me: async (parent, args, context) => {
 			if (context.user) {
 				return User.findOne({ _id: context.user._id }).populate("savedBooks");
@@ -38,6 +31,7 @@ const resolvers = {
 		},
 		// accepts (login AS email, password)
 		// returns Auth
+
 		addUser: async (parent, args) => {
 			const { username, email, password } = args.signup;
 			const newUser = await User.create({ username, email, password });
@@ -47,15 +41,15 @@ const resolvers = {
 		},
 		// accepts (signup AS username, email, password)
 		// returns Auth
-		saveBook: async (parent, args, context, info) => {
+
+		saveBook: async (parent, args, context) => {
 			const { authors, description, title, bookId, image, link } = args.book;
-            // const userId = "619f163a1d455824cc304ab1";
 			if (context.user) {
 				await User.findOneAndUpdate(
 					{ _id: context.user._id },
                     // { _id: userId },
 					{
-						$addToSet: {
+						$push: {
 							savedBooks: {
 								authors: authors,
 								description: description,
@@ -73,9 +67,9 @@ const resolvers = {
 		},
 		// accepts (book AS authors, description, title, bookId, image, link)
 		// returns User
+
 		removeBook: async (parent, args, context, info) => {
 			const { bookId } = args;
-            // const userId = "619f163a1d455824cc304ab1";
 			if (context.user) {
 				return await User.findOneAndUpdate(
 					{ _id: context.user.id },
